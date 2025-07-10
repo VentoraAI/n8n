@@ -1,19 +1,25 @@
-FROM node:20
+FROM node:18
 
+# Enable Corepack (needed for pnpm/yarn workspaces)
 RUN corepack enable
 
+# Set correct version of pnpm
+RUN corepack prepare pnpm@8.15.5 --activate
+
+# Create app directory
 WORKDIR /app
 
-COPY package.json ./
-COPY pnpm-lock.yaml ./
+# Copy dependency files
+COPY package.json pnpm-lock.yaml ./
 
-RUN corepack prepare pnpm@10.12.1 --activate
-RUN pnpm install --frozen-lockfile
+# Install dependencies
+RUN pnpm install
 
+# Copy rest of the files
 COPY . .
 
-RUN pnpm run build
-
+# Expose default n8n port
 EXPOSE 5678
 
-CMD ["pnpm", "run", "start"]
+# Start n8n
+CMD ["pnpm", "start"]
